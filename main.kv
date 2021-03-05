@@ -1,0 +1,203 @@
+#:import ZBarCam kivy_garden.zbarcam.ZBarCam
+#:import ZBarSymbol pyzbar.pyzbar.ZBarSymbol
+# Menu item in the DrawerList list.
+#:import Snackbar kivymd.uix.snackbar.Snackbar
+#:import FirebaseLoginScreen firebaseloginscreen.firebaseloginscreen.FirebaseLoginScreen
+
+
+
+<ItemDrawer>:
+    theme_text_color: "Custom"
+    on_release: self.parent.set_color_item(self)
+
+    IconLeftWidget:
+        id: icon
+        icon: root.icon
+        theme_text_color: "Custom"
+        text_color: root.text_color
+
+
+<ContentNavigationDrawer>:
+    orientation: "vertical"
+    padding: "8dp"
+    spacing: "8dp"
+
+    AnchorLayout:
+        anchor_x: "left"
+        size_hint_y: None
+        height: avatar.height
+
+        Image:
+            id: avatar
+            size_hint: None, None
+            size: "56dp", "56dp"
+            source: "data/logo/kivy-icon-256.png"
+
+    MDLabel:
+        text: "Keddar Mohamed Islam"
+        font_style: "Button"
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    MDLabel:
+        text: "keddar.mohamedislam@gmail.com"
+        font_style: "Caption"
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    ScrollView:
+
+        DrawerList:
+            id: md_list
+            ItemDrawer:
+                icon:"account-multiple"
+                text:"Mes commandes"
+                on_release:
+                    root.nav_drawer.set_state("close")
+                    root.manager.current = "commande"
+            ItemDrawer:
+                icon:"star"
+                text:"Contactez-nous"
+                on_release:
+                    root.nav_drawer.set_state("close")
+                    root.manager.current = "menu"
+            ItemDrawer:
+                icon:"histooory"
+                text:"Deconnexion"
+                on_release:
+                    root.nav_drawer.set_state("close")
+                    app.root.ids.firebase_login_screen.log_out()
+                    root.manager.current = "firebase_login_screen"
+            ItemDrawer:
+                icon: "AFFICHAGE CODE QR"
+                text: "AFFICHAGE CODE QR"
+                on_release:
+                    root.nav_drawer.set_state("close")
+                    root.manager.current = "gener"
+            ItemDrawer:
+                icon: "AFFICHAGE CODE QR"
+                text: "Historique"
+                on_release:
+                    root.nav_drawer.set_state("close")
+                    root.manager.current = "historique"
+
+
+
+# section page, tout ce qui suit c'est le contenu des differents page qu'on va utiliser dans notre app
+Screen:
+    MDToolbar:
+        id: toolbar
+        pos_hint: {"top": 1}
+        elevation: 10
+        title: "MDNavigationDrawer"
+        left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+
+
+    NavigationLayout:
+        x: toolbar.height
+
+        ScreenManager:
+            id: manager
+            FirebaseLoginScreen:
+                id: firebase_login_screen
+                name: "firebase_login_screen"
+                debug: True
+                remember_user: True
+                require_email_verification: True
+                web_api_key: "AIzaSyBtGtjj0f8xPVdfGrEQOVoWkHxBQhKFd-s" # Found in Firebase -> Project Settings -> Web API Key
+                background: "background.jpg"
+                on_login_success:
+                    # Defining this function lets you program what to do when the
+                    # user has logged in (probably you'll want to change screens)!
+                    # Get the important user info
+                    if self.login_state == 'in': app.user_localId = self.localId
+                    if self.login_state == 'in': app.user_idToken = self.idToken
+                    if self.login_state == "in": print("User logged in")
+                    if self.login_state == 'out': print("User logged out")
+            MenuScreen:
+            CODEQR:
+            gener_code:
+            Historique:
+            COMMANDE:
+
+        MDNavigationDrawer:
+            id: nav_drawer
+
+            ContentNavigationDrawer:
+                manager: manager
+                nav_drawer: nav_drawer
+
+
+
+<FirebaseLoginScreen>:
+    on_login_success:
+        root.manager.current = "menu"
+
+
+<MenuScreen>:
+    name:'menu'
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDFlatButton:
+            text: "gener un code"
+            theme_text_color: "Custom"
+            text_color: 0, 0, 1, 1
+            on_press: app.patch()
+        MDLabel:
+            text: "Screen 1"
+            halign: "center"
+
+
+<CODEQR>:
+    name:'code'
+    id : code
+    orientation: 'vertical'
+    BoxLayout:
+#        ZBarCam:
+#            id: zbarcam
+#            # optional, by default checks all types
+#            code_types: ZBarSymbol.QRCODE, ZBarSymbol.EAN13
+#        Label:
+#            id: code_liv
+##            size_hint: None, None
+#            size: self.texture_size[0], 50
+#            text: ', '.join([str(symbol.data) for symbol in zbarcam.symbols])
+#            on_text: root.CHANG(self.text)
+
+
+<gener_code>:
+    name:'gener'
+    BoxLayout:
+        orientation: 'vertical'
+        MDFlatButton:
+            text: "gener un code"
+            theme_text_color: "Custom"
+            text_color: 0, 0, 1, 1
+            on_press: root.genQR()
+#            on_press: root.genQR()
+
+<COMMANDE>:
+    name:'commande'
+    BoxLayout:
+        orientation: 'vertical'
+#        MDToolbar:
+#            title: "Navigation Drawer"
+#            elevation: 10
+#            left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+        Widget:
+
+<Historique>:
+    name:'historique'
+    BoxLayout:
+        orientation: 'vertical'
+#        MDToolbar:
+#            title: "Navigation Drawer"
+#            elevation: 10
+#            left_action_items: [['menu', lambda x: nav_drawer.toggle_nav_drawer()]]
+        Widget:
+            MDRaisedButton:
+                text: "Open list bottom sheet"
+                on_release: root.show_example_list_bottom_sheet()
+                pos_hint: {"center_x": .5, "center_y": .5}
+
